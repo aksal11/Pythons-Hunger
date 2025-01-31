@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 
 
 #initialize the game
@@ -21,14 +22,32 @@ WHITE = (255,255,255)
 #snake variables
 snake_pos = [[100,100],[90,100],[80,100]] # snake body ( list of segments)
 snake_dir = "RIGHT" #initial direction
-SPEED =40   #Snake speed
+SPEED =25   #Snake speed
 
 #food variables
 food_pos = [random.randrange(0,WIDTH,10), random.randrange(0,HEIGHT, 10)]
 food_spawn = True
 
-#font for game over message
-font = pygame.font.Font(None,36)
+#Scoring system
+score = 0
+high_score = 0
+
+#load high score from file
+if os.path.exists("highscore.txt"):
+    with open("highscore.txt", "r") as f:
+        content = f.read().strip() #removes spaces/new lines
+        if content.isdigit(): #ensure its a valid number
+            high_score = int(content)
+        else:
+            high_score = 0 #rest to  0 if file is empty or invalid
+else:
+    high_score = 0 #default high score if file doesn't exist
+
+#font for high score
+font = pygame.font.Font(None, 36)
+
+# #font for game over message
+# font = pygame.font.Font(None,36)
 
 #clock to control game speed
 clock = pygame.time.Clock()
@@ -100,8 +119,16 @@ while running:
     #draw food
     pygame.draw.rect(screen, RED, (food_pos[0], food_pos[1],10,10))
 
+    #draw score
+    score_text = font.render(f"Score:{score} High score : {high_score}",True,(255,255,255))
+    screen.blit(score_text, (10,10))
+
     pygame.display.flip()
     clock.tick(SPEED)
+
+#save high score to file
+with open("highscore.txt", "w") as f:
+    f.write(str(high_score))
 
 #show game over message
 screen.fill(BLACK)
