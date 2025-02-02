@@ -22,7 +22,7 @@ WHITE = (255,255,255)
 #snake variables
 snake_pos = [[100,100],[90,100],[80,100]] # snake body ( list of segments)
 snake_dir = "RIGHT" #initial direction
-SPEED =25   #Snake speed
+SPEED =15   #Snake speed
 
 #food variables
 food_pos = [random.randrange(0,WIDTH,10), random.randrange(0,HEIGHT, 10)]
@@ -42,6 +42,7 @@ if os.path.exists("highscore.txt"):
             high_score = 0 #rest to  0 if file is empty or invalid
 else:
     high_score = 0 #default high score if file doesn't exist
+print(f"loaded high score : {high_score}")
 
 #font for high score
 font = pygame.font.Font(None, 36)
@@ -83,11 +84,13 @@ while running:
     #Add new head to snake
     snake_pos.insert(0,new_head)
     
-    #check if the snake ears food
+    #check if the snake eats food
     if snake_pos[0] == food_pos:
+        score+= 1 #increase the score when food is eaten
         food_spawn = False #food eaten, spawn new one
     else:
         snake_pos.pop() #removes the last segment to maintain the length
+
 
     #spawn new food
     if not food_spawn:
@@ -106,6 +109,11 @@ while running:
     # 2 self collision
     if ( snake_pos[0] in snake_pos[1]):
         running = False # end game if snake bites itself
+
+    
+    #high score updates
+    if (score > high_score):
+        high_score = score #updated high score
 
 
 
@@ -126,12 +134,20 @@ while running:
     pygame.display.flip()
     clock.tick(SPEED)
 
-#save high score to file
-with open("highscore.txt", "w") as f:
-    f.write(str(high_score))
+    #save high score to file
+    if score > high_score:
+        high_score = score
+        with open("highscore.txt","w") as f:
+            f.write(str(high_score)) #new high score saved
+
+
+
+#show the high score
+score_text = font.render(f"Score:{score} High score: {high_score}", True, (255,255,255))
+screen.blit(score_text, (WIDTH //4, HEIGHT // 2 - 50))  #display above game over text
 
 #show game over message
-screen.fill(BLACK)
+# screen.fill(BLACK)
 text =  font.render("Game Over! Press any key to exit!!",True,WHITE)
 screen.blit(text, (WIDTH //4, HEIGHT//2))
 pygame.display.flip()
