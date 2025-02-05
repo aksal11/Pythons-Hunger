@@ -113,7 +113,8 @@ def game_over():
 
 #Game loop
 def game_loop():
-    global high_score, score, snake_pos, snake_dir, food_pos, food_spawn, food_move_counter
+    global high_score, score, snake_pos, snake_dir, food_pos, food_spawn, food_move_counter, paused
+    paused = False
     running = True
     while running:
         for event in pygame.event.get():
@@ -131,74 +132,78 @@ def game_loop():
                     snake_dir = "RIGHT"
                 elif event.key == pygame.K_LEFT and snake_dir != "RIGHT":
                     snake_dir = "LEFT"
+                elif event.key == pygame.K_p: #toggle pause when P is pressed
+                    paused = not paused
 
-        #move the snake
-        if snake_dir == "UP":
-            new_head = [snake_pos[0][0],snake_pos[0][1] - 10]
-        elif snake_dir == "DOWN":
-            new_head = [snake_pos[0][0],snake_pos[0][1] + 10]
-        elif snake_dir == "LEFT":
-            new_head = [snake_pos[0][0] - 10,snake_pos[0][1]]
-        elif snake_dir == "RIGHT":
-            new_head = [snake_pos[0][0] + 10 , snake_pos[0][1]]
+        #if the game is paused , skip updating the game logic
+        if not paused :
+            #move the snake
+            if snake_dir == "UP":
+                new_head = [snake_pos[0][0],snake_pos[0][1] - 10]
+            elif snake_dir == "DOWN":
+                new_head = [snake_pos[0][0],snake_pos[0][1] + 10]
+            elif snake_dir == "LEFT":
+                new_head = [snake_pos[0][0] - 10,snake_pos[0][1]]
+            elif snake_dir == "RIGHT":
+                new_head = [snake_pos[0][0] + 10 , snake_pos[0][1]]
 
-        #Add new head to snake
-        snake_pos.insert(0,new_head)
-        
-        #check if the snake eats food
-        if (abs(snake_pos[0][0] - food_pos[0]) < SNAKE_SIZE) and (abs(snake_pos[0][1] - food_pos[1]) < SNAKE_SIZE):
-            score+= 1 #increase the score when food is eaten
-            food_spawn = False #food eaten, spawn new one
-        else:
-            snake_pos.pop() #removes the last segment to maintain the length
-
-
-        #spawn new food
-        if not food_spawn:
-            while True:
-                food_pos = [random.randrange(0,WIDTH,10), random.randrange(0,HEIGHT,10)]
-                if food_pos not in snake_pos: #ensure food doesn't spawn on snake
-                    break
-            food_spawn = True
+            #Add new head to snake
+            snake_pos.insert(0,new_head)
+            
+            #check if the snake eats food
+            if (abs(snake_pos[0][0] - food_pos[0]) < SNAKE_SIZE) and (abs(snake_pos[0][1] - food_pos[1]) < SNAKE_SIZE):
+                score+= 1 #increase the score when food is eaten
+                food_spawn = False #food eaten, spawn new one
+            else:
+                snake_pos.pop() #removes the last segment to maintain the length
 
 
-        # Collision detection
-        # 1 wall collision
-        if ( snake_pos[0][0] < 0 or snake_pos[0][0] >= WIDTH or snake_pos[0][1] < 0 or snake_pos[0][1] >= HEIGHT):
-            running = False #end game if snake hits wall
-        
-        # 2 self collision
-        if ( snake_pos[0] in snake_pos[1]):
-            running = False # end game if snake bites itself
+            #spawn new food
+            if not food_spawn:
+                while True:
+                    food_pos = [random.randrange(0,WIDTH,10), random.randrange(0,HEIGHT,10)]
+                    if food_pos not in snake_pos: #ensure food doesn't spawn on snake
+                        break
+                food_spawn = True
 
-        
-        #high score updates
-        if (score > high_score):
-            high_score = score #updated high score
-        
-        #increase speed every 5 points
-        SPEED = base_speed + ( score // 5) *2
 
-        # move food every few frames after score 10
-        if score >= 5:
-            food_move_counter +=1 
-            if food_move_counter >= food_move_delay:
-                new_food_pos = [random.randrange(0, WIDTH, 10 ), random.randrange(0, HEIGHT, 10)]
+            # Collision detection
+            # 1 wall collision
+            if ( snake_pos[0][0] < 0 or snake_pos[0][0] >= WIDTH or snake_pos[0][1] < 0 or snake_pos[0][1] >= HEIGHT):
+                running = False #end game if snake hits wall
+            
+            # 2 self collision
+            if ( snake_pos[0] in snake_pos[1]):
+                running = False # end game if snake bites itself
 
-                # ensure food doesn't move if the snake is close to it
-                if abs(new_food_pos[0] - snake_pos[0][0]) > 20 and abs (new_food_pos[1] - snake_pos[0][1]) > 20:
-                    food_pos = new_food_pos
-                    food_move_counter = 0 # reset counter after moving food
-        # obstacles at high score
-        obstacles = []
+            
+            #high score updates
+            if (score > high_score):
+                high_score = score #updated high score
+            
+            #increase speed every 5 points
+            SPEED = base_speed + ( score // 5) *2
 
-        # spawn obstacles after score 15
-        if score >= 5 and len(obstacles) < 5:
-            obstacles.append([random.randrange(0, WIDTH, 10), random.randrange(0, HEIGHT,10)])
+            # move food every few frames after score 10
+            if score >= 5:
+                food_move_counter +=1 
+                if food_move_counter >= food_move_delay:
+                    new_food_pos = [random.randrange(0, WIDTH, 10 ), random.randrange(0, HEIGHT, 10)]
 
-        #check if snake hits and obstacle
-        if snake_pos[0] in obstacles:
-            running = False # GAME OVER
+                    # ensure food doesn't move if the snake is close to it
+                    if abs(new_food_pos[0] - snake_pos[0][0]) > 20 and abs (new_food_pos[1] - snake_pos[0][1]) > 20:
+                        food_pos = new_food_pos
+                        food_move_counter = 0 # reset counter after moving food
+            # obstacles at high score
+            obstacles = []
+
+            # spawn obstacles after score 15
+            if score >= 5 and len(obstacles) < 5:
+                obstacles.append([random.randrange(0, WIDTH, 10), random.randrange(0, HEIGHT,10)])
+
+            #check if snake hits and obstacle
+            if snake_pos[0] in obstacles:
+                running = False # GAME OVER
 
         #draw everything
         screen.fill(BLACK)
@@ -213,6 +218,13 @@ def game_loop():
         #draw score
         score_text = font.render(f"Score:{score} High score : {high_score}",True,(255,255,255))
         screen.blit(score_text, (10,10))
+
+
+        # display pause message if the game is paused
+        if paused :
+            pause_text = font.render("PAUSED - Press 'p' to Resume", True, WHITE)
+            screen.blit(pause_text, (WIDTH //4, HEIGHT //2))
+
 
         pygame.display.flip()
         clock.tick(SPEED)
