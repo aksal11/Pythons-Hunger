@@ -84,13 +84,14 @@ def game_over():
         with open("highscore.txt", "w") as f:
             f.write(str(high_score)) #save new high score
     
-    #show the high score
+    #show the high score and game over message
+    screen.fill(BLACK)
     score_text = font.render(f"Score:{score} High score: {high_score}", True, (255,255,255))
     screen.blit(score_text, (WIDTH //4, HEIGHT // 2 - 50))  #display above game over text
 
     #show game over message
     # screen.fill(BLACK)
-    text =  font.render("Game Over! Press any key to exit!!",True,WHITE)
+    text =  font.render("Game Over! Press SPACE to restart or ESC to exit!!",True,WHITE)
     screen.blit(text, (WIDTH //4, HEIGHT//2))
     pygame.display.flip()
 
@@ -98,17 +99,28 @@ def game_over():
     waiting = True
     while waiting:
         for event in pygame.event.get():
-            if event.type ==  pygame.QUIT or event.type == pygame.KEYDOWN:
-                waiting = False
+            if event.type ==  pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE: #restart the game
+                    reset_game()
+                    waiting = False
+                    return True
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
 
 #Game loop
 def game_loop():
-    global high_score, score, snake_pos, snake_dir, food_pos, food_spawn, food_move_counter0
+    global high_score, score, snake_pos, snake_dir, food_pos, food_spawn, food_move_counter
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running =  False
+                pygame.quit()
+                quit()
                 #Movements
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP and snake_dir != "DOWN":
@@ -206,7 +218,9 @@ def game_loop():
         clock.tick(SPEED)
     
     
-    game_over() #show game over message and restarts the game
+    #after the game loop ends, call game_over and check if the game should restart
+    if game_over():
+        game_loop() # restart the game loop
     
 #start the game loop
 reset_game()
