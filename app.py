@@ -31,12 +31,15 @@ def draw_text(text, x,y,color = WHITE):
 def main_menu():
     # landing page
     running = True
+    selected = 0 # 0 - start game, 1 - leaderboard, 2 -exit
+    options = ["Start Game", "Leaderboard", "Exit"]
     while running:
         screen.fill(BLACK)
         draw_text("PYTHON'S HUNGER",WIDTH//3, HEIGHT //4, GREEN)
-        draw_text("Start Game", WIDTH //3, HEIGHT // 2)
-        draw_text("Leaderboard", WIDTH//3, HEIGHT//2 +50)
-        draw_text("EXIT",WIDTH // 3 , HEIGHT // 2 + 100)
+
+        for i, option in enumerate(options):
+            color = WHITE if 1!= selected else RED # Highlight the selected option
+            draw_text(f"> {option}" if i == selected else option, WIDTH // 3, HEIGHT //2 + i * 50, color )
 
         pygame.display.flip()
 
@@ -45,14 +48,19 @@ def main_menu():
                 pygame.quit()
                 exit()
             
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1: #start the game
-                    return "start"
-                elif event.key == pygame.K_2: #leaderboard
-                    return "leaderboard"
-                elif event.key == pygame.K_3: #exit
-                    pygame.quit()
-                    exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP: #start the game
+                    selected = (selected - 1)% len(options)  #move up
+                elif event.key == pygame.K_DOWN: #leaderboard
+                    selected = (selected + 1)%len(options) #move down
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER: #exit
+                    if selected ==0: # start game
+                        return "start"
+                    elif selected == 1: # leaderboard
+                        return "leaderboard"
+                    elif selected == 2: #exit
+                        pygame.quit()
+                        exit()
 
 def show_leaderboard():
     """Display the leaderboard (To be implemented)."""
