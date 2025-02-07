@@ -9,6 +9,7 @@ pygame.init()
 #set up display
 WIDTH, HEIGHT = 800,800
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Python's Hunger")
 
 
@@ -17,6 +18,60 @@ BLACK = (0,0,0)
 GREEN = (0,255,0)
 RED = (255,0,0)
 WHITE = (255,255,255)
+
+
+font = pygame.font.Font(None, 50)
+
+def draw_text(text, x,y,color = WHITE):
+    # to draw text on the screen
+    text_surface = font.render(text,True, color)
+    screen.blit(text_surface, (x,y))
+
+
+def main_menu():
+    # landing page
+    running = True
+    while running:
+        screen.fill(BLACK)
+        draw_text("PYTHON'S HUNGER",WIDTH//3, HEIGHT //4, GREEN)
+        draw_text("Start Game", WIDTH //3, HEIGHT // 2)
+        draw_text("Leaderboard", WIDTH//3, HEIGHT//2 +50)
+        draw_text("EXIT",WIDTH // 3 , HEIGHT // 2 + 100)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1: #start the game
+                    return "start"
+                elif event.key == pygame.K_2: #leaderboard
+                    return "leaderboard"
+                elif event.key == pygame.K_3: #exit
+                    pygame.quit()
+                    exit()
+
+def show_leaderboard():
+    """Display the leaderboard (To be implemented)."""
+    screen.fill(BLACK)
+    draw_text("Leaderboard (Coming Soon)", WIDTH // 3, HEIGHT // 3, WHITE)
+    draw_text("Press ESC to go back", WIDTH // 3, HEIGHT // 2, WHITE)
+    pygame.display.flip()
+    
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                waiting = False  # Return to main menu
+
+
+
 
 # adjusting the size of the snake and food
 SNAKE_SIZE = 20
@@ -31,7 +86,7 @@ base_speed= 25    #Snake speed
 
 
 #food variables
-food_pos = [random.randrange(0,WIDTH,10), random.randrange(0,HEIGHT, 10)]
+food_pos = [random.randrange(0,WIDTH - FOOD_SIZE,FOOD_SIZE), random.randrange(0,HEIGHT - FOOD_SIZE, FOOD_SIZE)]
 food_spawn = True
 
 #Scoring system
@@ -230,11 +285,22 @@ def game_loop():
         clock.tick(SPEED)
     
     
+    main()
     #after the game loop ends, call game_over and check if the game should restart
     if game_over():
         game_loop() # restart the game loop
-    
+
+
+# main function to start the game
+def main():
+    while True :
+        choice = main_menu()
+        if choice == "start":
+            reset_game()
+            game_loop()
+        elif choice == "leaderboard":
+            show_leaderboard()
+
 #start the game loop
-reset_game()
-game_loop()
+main()
 pygame.quit()
