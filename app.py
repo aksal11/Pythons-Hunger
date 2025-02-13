@@ -3,8 +3,12 @@ import random
 import os
 
 
+
+
 #initialize the game
 pygame.init()
+
+
 
 #set up display
 WIDTH, HEIGHT = 800,800
@@ -19,13 +23,22 @@ GREEN = (0,255,0)
 RED = (255,0,0)
 WHITE = (255,255,255)
 
+font = pygame.font.Font(None,40)
 
-font = pygame.font.Font(None, 50)
 
-def draw_text(text, x,y,color = WHITE):
+
+
+def draw_text(text, x,y,color = WHITE,center=False):
     # to draw text on the screen
-    text_surface = font.render(text,True, color)
-    screen.blit(text_surface, (x,y))
+    text_surface = font.render(text, True, color)  # Use render() instead
+    text_rect = text_surface.get_rect()
+
+    if center:
+        text_rect.center = (x, y)  # Center text at (x, y)
+    else:
+        text_rect.topleft = (x, y)  # Place text at (x, y) without centering
+
+    screen.blit(text_surface, text_rect)
 
 
 def main_menu():
@@ -35,11 +48,11 @@ def main_menu():
     options = ["Start Game", "Leaderboard", "Exit"]
     while running:
         screen.fill(BLACK)
-        draw_text("PYTHON'S HUNGER",WIDTH//3, HEIGHT //4, GREEN)
+        draw_text("PYTHON'S HUNGER",WIDTH//2, HEIGHT //4, GREEN, center=True)
 
         for i, option in enumerate(options):
-            color = WHITE if 1!= selected else RED # Highlight the selected option
-            draw_text(f"> {option}" if i == selected else option, WIDTH // 3, HEIGHT //2 + i * 50, color )
+            color = RED if i == selected else WHITE # Highlight the selected option
+            draw_text(option, WIDTH // 2, HEIGHT // 2 + i * 50, color, center=True)
 
         pygame.display.flip()
 
