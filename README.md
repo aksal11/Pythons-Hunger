@@ -7,5 +7,5 @@ This game is developed using Python only.
 - Dynamic Difficulty
 - HighScore
 
-More Feautes need to be implemented and under development
+More Features needs to be implemented and under development.
 
