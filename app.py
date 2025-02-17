@@ -187,19 +187,24 @@ def game_over():
                     pygame.quit()
                     quit()
 
-obstacles = []
-obstacles_timer = 0 
-obstacle_interval = 300
+
 
 
 
 # Obstacles list should be global so it persists
-obstacles = []
+OBSTACLE_EVENT = pygame.USEREVENT + 1  
+pygame.time.set_timer(OBSTACLE_EVENT, 10000)
 
 
 #game loop
 def game_loop():
-    global high_score, score, snake_pos, snake_dir, food_pos, food_spawn, food_move_counter, paused, obstacles
+    global high_score, score, snake_pos, snake_dir, food_pos, food_spawn, food_move_counter, paused
+    global obstacles
+
+    obstacles = []
+    obstacles_timer = 0 
+    obstacle_interval = 1500
+
     paused = False
     running = True
 
@@ -224,6 +229,13 @@ def game_loop():
                     snake_dir = "LEFT"
                 elif event.key == pygame.K_p:  # Pause the game
                     paused = not paused
+            
+            # Triggered every 10 seconds to update obstacles
+            elif event.type == OBSTACLE_EVENT:
+                obstacles.clear()  # Remove old obstacles
+                for _ in range(5):  # Generate 5 new obstacles
+                    obstacles.append([random.randrange(0, WIDTH, 10), random.randrange(0, HEIGHT, 10)])
+
 
         if not paused:
             # Move the snake
@@ -271,8 +283,6 @@ def game_loop():
                     pygame.quit()
                     exit()
 
-
-            obstacles_timer += 1
 
             #change obstacles every obstacle_interval frames
             if obstacles_timer >= obstacle_interval:
@@ -338,7 +348,7 @@ def game_loop():
             screen.blit(pause_text, (WIDTH // 4, HEIGHT // 2))
 
         pygame.display.flip()
-        clock.tick(base_speed + (score // 5) * 2)
+        clock.tick(30)
 
     
     
