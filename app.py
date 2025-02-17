@@ -7,6 +7,7 @@ import os
 
 #initialize the game
 pygame.init()
+pygame.mixer.init()
 
 
 
@@ -25,6 +26,20 @@ WHITE = (255,255,255)
 
 font = pygame.font.Font(None,40)
 
+# load sound effects
+# move_sound = pygame.mixer.Sound("menu.wav")
+pause_sound = pygame.mixer.Sound("sound/pause.wav")
+select_sound = pygame.mixer.Sound("sound/select.wav")
+game_over_sound = pygame.mixer.Sound("sound/game_over.wav")
+snake_control_sound = pygame.mixer.Sound("sound/snake-control.wav")
+
+#adjust volume
+# move_sound.set_volume(0.5)  # Adjust between 0.0 (mute) and 1.0 (full volume)
+pause_sound.set_volume(0.5)
+select_sound.set_volume(0.5)
+game_over_sound.set_volume(0.5)
+snake_control_sound.set_volume(0.5)
+
 
 
 
@@ -42,16 +57,21 @@ def draw_text(text, x,y,color = WHITE,center=False):
 
 
 def main_menu():
-    # landing page
+    # Initialize sound effects
+    pygame.mixer.init()
+    # move_sound = pygame.mixer.Sound("menu.wav")  # Sound for menu navigation
+    select_sound = pygame.mixer.Sound("sound/select.wav")  # Sound when selecting an option
+    
     running = True
-    selected = 0 # 0 - start game, 1 - leaderboard, 2 -exit
+    selected = 0  # 0 - start game, 1 - leaderboard, 2 - exit
     options = ["Start Game", "Leaderboard", "Exit"]
+
     while running:
         screen.fill(BLACK)
-        draw_text("PYTHON'S HUNGER",WIDTH//2, HEIGHT //4, GREEN, center=True)
+        draw_text("PYTHON'S HUNGER", WIDTH // 2, HEIGHT // 4, GREEN, center=True)
 
         for i, option in enumerate(options):
-            color = RED if i == selected else WHITE # Highlight the selected option
+            color = RED if i == selected else WHITE  # Highlight the selected option
             draw_text(option, WIDTH // 2, HEIGHT // 2 + i * 50, color, center=True)
 
         pygame.display.flip()
@@ -60,18 +80,23 @@ def main_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            
+
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP: #start the game
-                    selected = (selected - 1)% len(options)  #move up
-                elif event.key == pygame.K_DOWN: #leaderboard
-                    selected = (selected + 1)%len(options) #move down
-                elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER: #exit
-                    if selected ==0: # start game
+                if event.key == pygame.K_UP:
+                    selected = (selected - 1) % len(options)  # Move up
+                    select_sound.play()
+                elif event.key == pygame.K_DOWN:
+                    selected = (selected + 1) % len(options)  # Move down
+                    select_sound.play()
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                    select_sound.play()
+                    pygame.time.delay(200)  # Small delay to allow sound to play
+                    
+                    if selected == 0:  # Start game
                         return "start"
-                    elif selected == 1: # leaderboard
+                    elif selected == 1:  # Leaderboard
                         return "leaderboard"
-                    elif selected == 2: #exit
+                    elif selected == 2:  # Exit
                         pygame.quit()
                         exit()
 
@@ -196,6 +221,19 @@ def game_loop():
     global high_score, score, snake_pos, snake_dir, food_pos, food_spawn, food_move_counter, paused
    
 
+
+   
+    # Initialize sound effects
+    pygame.mixer.init()
+    # move_sound = pygame.mixer.Sound("menu.wav")  # Sound for snake movement
+    pause_sound = pygame.mixer.Sound("sound/pause.wav")  # Sound for pausing the game
+    select_sound = pygame.mixer.Sound("sound/select.wav")
+    game_over_sound = pygame.mixer.Sound("sound/game_over.wav")
+    snake_control_sound = pygame.mixer.Sound("sound/snake-control.wav")
+
+    snake_control_sound.set_volume(0.1)
+    select_sound.set_volume(0.4)
+
     paused = False
     running = True
 
@@ -211,15 +249,19 @@ def game_loop():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP and snake_dir != "DOWN":
                     snake_dir = "UP"
+                    snake_control_sound.play()
                 elif event.key == pygame.K_DOWN and snake_dir != "UP":
                     snake_dir = "DOWN"
+                    snake_control_sound.play()
                 elif event.key == pygame.K_RIGHT and snake_dir != "LEFT":
                     snake_dir = "RIGHT"
+                    snake_control_sound.play()
                 elif event.key == pygame.K_LEFT and snake_dir != "RIGHT":
                     snake_dir = "LEFT"
+                    snake_control_sound.play()
                 elif event.key == pygame.K_p:  # Pause the game
                     paused = not paused
-
+                    pause_sound.play()
 
         if not paused:
             # Move the snake
@@ -238,6 +280,7 @@ def game_loop():
             # Check if the snake eats food
             if (abs(snake_pos[0][0] - food_pos[0]) < SNAKE_SIZE) and (abs(snake_pos[0][1] - food_pos[1]) < SNAKE_SIZE):
                 score += 1
+                select_sound.play()
                 food_spawn = False
             else:
                 snake_pos.pop()  # Remove the last segment to maintain length
@@ -318,10 +361,12 @@ def main():
             show_leaderboard()
 
 def game_over_screen():
+    game_over_sound.play()
     screen.fill(BLACK)  # Clear the screen
     draw_text("GAME OVER", WIDTH // 2, HEIGHT // 3, RED, center=True)
     draw_text("Press ENTER to Restart", WIDTH // 2, HEIGHT // 2, WHITE, center=True)
     draw_text("Press ESC to Exit", WIDTH // 2, HEIGHT // 2 + 50, WHITE, center=True)
+    select_sound = pygame.mixer.Sound("sound/select.wav")
     pygame.display.flip()
 
     waiting = True
@@ -332,8 +377,10 @@ def game_over_screen():
                 exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:  # Restart the game
+                    select_sound.play()
                     return "restart"
                 elif event.key == pygame.K_ESCAPE:  # Exit the game
+                    select_sound.play()
                     pygame.quit()
                     exit()
 
