@@ -191,25 +191,15 @@ def game_over():
 
 
 
-# Obstacles list should be global so it persists
-OBSTACLE_EVENT = pygame.USEREVENT + 1  
-pygame.time.set_timer(OBSTACLE_EVENT, 10000)
-
-
 #game loop
 def game_loop():
     global high_score, score, snake_pos, snake_dir, food_pos, food_spawn, food_move_counter, paused
-    global obstacles
-
-    obstacles = []
-    obstacles_timer = 0 
-    obstacle_interval = 1500
+   
 
     paused = False
     running = True
 
-    # Clear old obstacles and generate new ones at score 15
-    obstacles.clear()
+
     
     while running:
         for event in pygame.event.get():
@@ -229,12 +219,6 @@ def game_loop():
                     snake_dir = "LEFT"
                 elif event.key == pygame.K_p:  # Pause the game
                     paused = not paused
-            
-            # Triggered every 10 seconds to update obstacles
-            elif event.type == OBSTACLE_EVENT:
-                obstacles.clear()  # Remove old obstacles
-                for _ in range(5):  # Generate 5 new obstacles
-                    obstacles.append([random.randrange(0, WIDTH, 10), random.randrange(0, HEIGHT, 10)])
 
 
         if not paused:
@@ -265,31 +249,6 @@ def game_loop():
                     if food_pos not in snake_pos:
                         break
                 food_spawn = True
-
-            # spawn obstacles
-            if score >= 5 and len(obstacles) < 5:
-                while len(obstacles) < 5:
-                    new_obstacle = [random.randrange(0, WIDTH, 10), random.randrange(0, HEIGHT, 10)]
-                    if new_obstacle not in snake_pos and new_obstacle != food_pos:
-                        obstacles.append(new_obstacle)
-
-            # to check if snake hits an obstacle
-            if tuple(snake_pos[0]) in [tuple(obs) for obs in obstacles]:  # Convert to tuples for comparison
-                choice = game_over_screen()  # Show Game Over Screen
-                if choice == "restart":
-                    reset_game()
-                    return game_loop()  # Restart the game
-                else:
-                    pygame.quit()
-                    exit()
-
-
-            #change obstacles every obstacle_interval frames
-            if obstacles_timer >= obstacle_interval:
-                obstacles.clear()
-                for _ in range(5):
-                    obstacles.append([random.randrange(0, WIDTH, 10), random.randrange(0, HEIGHT, 10)])
-                obstacle_timer = 0
             
 
             # Wall Collision
@@ -315,14 +274,6 @@ def game_loop():
                     pygame.quit()
                     exit()
             
-            for obstacle in obstacles:
-                if snake_pos[0] == obstacle:
-                    choice = game_over_screen()
-                    if choice == "restart":
-                        main() 
-                    else:
-                        pygame.quit()
-                        exit()
 
         # draw everything
         screen.fill(BLACK)
@@ -334,9 +285,7 @@ def game_loop():
         # Draw Food
         pygame.draw.rect(screen, RED, (food_pos[0], food_pos[1], FOOD_SIZE, FOOD_SIZE))
 
-        # draw obstacles
-        for obs in obstacles:
-            pygame.draw.rect(screen, (255, 165, 0), (obstacle[0], obstacle[1], 20, 20))
+        
 
         # Draw Score
         score_text = font.render(f"Score: {score} High Score: {high_score}", True, WHITE)
